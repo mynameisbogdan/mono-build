@@ -1,0 +1,5 @@
+mono-src/
+build/
+
+*.tar.xz
+*.tar.gz
