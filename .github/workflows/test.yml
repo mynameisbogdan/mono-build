@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: source-cache
         with:
-          key: mono-source-${{ runner.os }}-${{ env.MONO_VERSION }}
+          key: mono-source-${{ env.MONO_VERSION }}
           path: mono-${{ env.MONO_VERSION }}.tar.xz
 
       - name: Grab source tarball
@@ -54,7 +54,7 @@ jobs:
       - name: Restore source
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: mono-source-${{ runner.os }}-${{ env.MONO_VERSION }}
+          key: mono-source-${{ env.MONO_VERSION }}
           path: mono-${{ env.MONO_VERSION }}.tar.xz
           fail-on-cache-miss: true
 
@@ -89,7 +89,7 @@ jobs:
       - name: Restore source
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: mono-source-${{ runner.os }}-${{ env.MONO_VERSION }}
+          key: mono-source-${{ env.MONO_VERSION }}
           path: mono-${{ env.MONO_VERSION }}.tar.xz
           fail-on-cache-miss: true
 
@@ -115,7 +115,7 @@ jobs:
       fail-fast: false
       matrix:
         architecture:
-          - arm64
+#          - arm64
           - x64
     steps:
       - name: Checkout
@@ -124,7 +124,7 @@ jobs:
       - name: Restore source
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: mono-source-${{ runner.os }}-${{ env.MONO_VERSION }}
+          key: mono-source-${{ env.MONO_VERSION }}
           path: mono-${{ env.MONO_VERSION }}.tar.xz
           fail-on-cache-miss: true
 
@@ -148,3 +148,43 @@ jobs:
         run: |
           file mono-src/support/.libs/libMonoPosixHelper.*
           ldd mono-src/support/.libs/libMonoPosixHelper.so || true
+
+  build_mac:
+    runs-on: macos-14
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture:
+          - arm64
+          - x64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Restore source
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: mono-source-${{ env.MONO_VERSION }}
+          path: mono-${{ env.MONO_VERSION }}.tar.xz
+          fail-on-cache-miss: true
+
+      - name: Unzip source tarball
+        run: |
+          mkdir mono-src
+          tar xf ./mono-${MONO_VERSION}.tar.xz -C mono-src --strip-components=1
+
+      - name: Install dependecies
+        run: |
+          brew install autoconf automake libtool cmake make python3
+
+      - name: Build
+        run: |
+          ./build.sh osx-${{ matrix.architecture }}
+
+      - name: List artifacts
+        run: |
+          otool -L mono-src/support/.libs/libMonoPosixHelper.dylib
+          otool -l mono-src/support/.libs/libMonoPosixHelper.dylib
+          file mono-src/support/.libs/libMonoPosixHelper.*
+          ldd mono-src/support/.libs/libMonoPosixHelper.dylib || true

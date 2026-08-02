@@ -11,19 +11,13 @@ readonly BUILD_DIRECTORY="${SCRIPT_DIRECTORY}/mono-src"
 
 cd "${BUILD_DIRECTORY}"
 
-STRIP_CMD="strip --strip-all"
-
 case "$ARCHITECTURE" in
   linux-arm)
-    STRIP_CMD="arm-linux-gnueabihf-strip --strip-all"
-
     ./autogen.sh \
       --build=x86_64-linux-gnu \
       --host=arm-linux-gnueabihf
     ;;
   linux-arm64)
-    STRIP_CMD="aarch64-linux-gnu-strip --strip-all --strip-all"
-
     ./autogen.sh \
       --build=x86_64-linux-gnu \
       --host=aarch64-linux-gnu
@@ -34,8 +28,6 @@ case "$ARCHITECTURE" in
       --host=x86_64-linux-gnu
     ;;
   linux-x86)
-    STRIP_CMD="i686-linux-gnu-strip --strip-all"
-
     ./autogen.sh \
       --build=x86_64-linux-gnu \
       --host=i686-linux-gnu
@@ -45,6 +37,14 @@ case "$ARCHITECTURE" in
     ;;
   freebsd-x64 | freebsd-arm64)
     CC=clang CXX=clang++ ./autogen.sh
+    ;;
+  osx-arm64)
+    CC=clang CXX=clang++ CFLAGS="-mmacosx-version-min=13.0" ./autogen.sh
+    ;;
+  osx-x64)
+    CC=clang CXX=clang++ CFLAGS="-mmacosx-version-min=10.13" ./autogen.sh \
+      --build=aarch64-apple-darwin20.6.0 \
+      --host=x86_64-apple-darwin20.6.0
     ;;
   *)
     echo "Unsupported architecture $ARCHITECTURE"
@@ -61,4 +61,20 @@ make
 cd "${BUILD_DIRECTORY}/support"
 make
 
-$STRIP_CMD .libs/libMonoPosixHelper.so
+case "$ARCHITECTURE" in
+  linux-arm)
+    arm-linux-gnueabihf-strip --strip-all .libs/libMonoPosixHelper.so
+    ;;
+  linux-arm64)
+    aarch64-linux-gnu-strip --strip-all .libs/libMonoPosixHelper.so
+    ;;
+  linux-x86)
+    i686-linux-gnu-strip --strip-all .libs/libMonoPosixHelper.so
+    ;;
+  osx-*)
+    strip -S .libs/libMonoPosixHelper.dylib
+    ;;
+  *)
+    strip --strip-all .libs/libMonoPosixHelper.so
+    ;;
+esac
