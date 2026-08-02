@@ -73,6 +73,16 @@ jobs:
           file mono-src/support/.libs/libMonoPosixHelper.*
           ldd mono-src/support/.libs/libMonoPosixHelper.so || true
 
+      - name: Prepare build artifact
+        run: mkdir -p build/linux-${{ matrix.architecture }} && cp mono-src/support/.libs/libMonoPosixHelper.so build/linux-${{ matrix.architecture }}/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-linux-${{ matrix.architecture }}
+          path: build
+          if-no-files-found: error
+
   build_linux_musl:
     runs-on: ${{ startsWith(matrix.architecture, 'arm') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     needs: prepare
@@ -107,6 +117,16 @@ jobs:
         run: |
           file mono-src/support/.libs/libMonoPosixHelper.*
           ldd mono-src/support/.libs/libMonoPosixHelper.so || true
+
+      - name: Prepare build artifact
+        run: mkdir -p build/linux-musl-${{ matrix.architecture }} && cp mono-src/support/.libs/libMonoPosixHelper.so build/linux-musl-${{ matrix.architecture }}/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-linux-musl-${{ matrix.architecture }}
+          path: build
+          if-no-files-found: error
 
   build_freebsd:
     runs-on: ubuntu-latest
@@ -149,6 +169,16 @@ jobs:
           file mono-src/support/.libs/libMonoPosixHelper.*
           ldd mono-src/support/.libs/libMonoPosixHelper.so || true
 
+      - name: Prepare build artifact
+        run: mkdir -p build/freebsd-${{ matrix.architecture }} && cp mono-src/support/.libs/libMonoPosixHelper.so build/freebsd-${{ matrix.architecture }}/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-freebsd-${{ matrix.architecture }}
+          path: build
+          if-no-files-found: error
+
   build_mac:
     runs-on: macos-14
     needs: prepare
@@ -187,4 +217,13 @@ jobs:
           otool -L mono-src/support/.libs/libMonoPosixHelper.dylib
           otool -l mono-src/support/.libs/libMonoPosixHelper.dylib
           file mono-src/support/.libs/libMonoPosixHelper.*
-          ldd mono-src/support/.libs/libMonoPosixHelper.dylib || true
+
+      - name: Prepare build artifact
+        run: mkdir -p build/osx-${{ matrix.architecture }} && cp mono-src/support/.libs/libMonoPosixHelper.dylib build/osx-${{ matrix.architecture }}/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-osx-${{ matrix.architecture }}
+          path: build
+          if-no-files-found: error
