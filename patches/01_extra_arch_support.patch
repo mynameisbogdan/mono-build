@@ -1,0 +1,28 @@
+--- mono-src.orig/configure.ac	2023-07-25 23:48:25.000000000 +0300
++++ mono-src/configure.ac	2026-08-02 13:53:35.147456563 +0300
+@@ -414,6 +414,7 @@
+ 		has_dtrace=yes
+ 		if test "x$cross_compiling" = "xyes"; then
+ 			has_broken_apple_cpp=yes
++			mono_cv_uscore=no
+ 		fi
+ 		dnl Snow Leopard is horribly broken -- it reports itself as i386-apple-darwin*, but
+ 		dnl its gcc defaults to 64-bit mode.  They have also deprecated the usage of ucontext
+--- mono-src.orig/support/fstab.c	2023-07-25 23:41:24.000000000 +0300
++++ mono-src/support/fstab.c	2026-08-02 13:54:41.326320884 +0300
+@@ -334,6 +334,15 @@
+ 
+ #endif /* def HAVE_FSTAB_H || def HAVE_CHECKPOINT_H || def HAVE_SYS_VFSTAB_H */
+ 
++#if !defined(HAVE_FSTAB_H) && !defined(HAVE_SYS_VFSTAB_H)
++gint32
++Mono_Posix_Syscall_getfsfile (const char *mount_point,
++    struct Mono_Posix_Syscall__Fstab *fsbuf)
++{
++  return 1;
++}
++#endif
++
+ G_END_DECLS
+ 
+ /*
