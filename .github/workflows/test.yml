@@ -292,3 +292,20 @@ jobs:
             echo "$file"
             osslsigncode verify -in "$file" -verbose || true
           done
+
+  test:
+    needs:
+      - prepare
+    runs-on: windows-latest
+    steps:
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: latest
+
+      - name: Check for sn
+        run: |
+          which sn.exe
+          which sn
+          sn.exe || true
+          sn || true
